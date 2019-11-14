@@ -5,7 +5,7 @@
 
 lte(time(_,_,am), time(_,_,pm)).
 lte(time(T1H,_,AP), time(T2H,_,AP)):-T1H<T2H.
-lte(time(TH,T1M,AP), time(TH,T2M,AP)):-T1M-<T2M.
+lte(time(TH,T1M,AP), time(TH,T2M,AP)):-T1M=<T2M.
 
 overlab(slot(OuterBeg,OuterEnd), slot(InnerBeg,InnerEnd), slot(InnerBeg,InnerEnd)):-
     lte(OuterBeg,InnerBeg), lte(InnerBeg,OuterEnd), lte(InnerEnd,OuterEnd),InnerBeg\==InnerEnd.
