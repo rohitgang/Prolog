@@ -1,4 +1,6 @@
-#!/bin/bash -x
-gplc meet.pl
+#~/bin/bash
 
-./meet
+#set -x
+#export PATH=/usr/bin:/bin:../../bin
+
+app gprolog --consult-file meet.pl
