@@ -23,7 +23,7 @@ commonTime([Person|Tail],FirstSlot, SecondSlot):-
 
 meetall([Person|Tail],Slot):- free(Person,FSlot),commonTime(Tail,FSlot,Slot).
 
-meet(Slot):-people(people),meetall(People,Slot).
+meet(Slot):-people(People),meetall(People,Slot).
 
 people([ann,bob,carla]).
 
