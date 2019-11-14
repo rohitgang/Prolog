@@ -13,8 +13,9 @@ overlap(slot(BeginOut, EndOut),slot(BeginIn,EndIn),slot(BeginIn,EndIn)):-
 overlap(slot(BeginOut, EndOut), slot(BeginIn, EndIn), slot(BeginIn, EndOut)):-
     lte(BeginOut, BeginIn), lte(BeginIn,EndOut), lte(EndOut, EndIn),BeginIn\==EndOut.
 
+common(Slot1, Slot2, Slot3):-overlap(Slot2,Slot1,Slot3).
 common(Slot1, Slot2, Slot3):-overlap(Slot1,Slot2,Slot3).
-common(Slot1, Slot2, Slot3):-overlap(Slot3,Slot1,Slot2).
+/*common(Slot1, Slot2, Slot3):-overlap(Slot3,Slot1,Slot2).*/
 
 commonTime([], Slot, Slot).
 
