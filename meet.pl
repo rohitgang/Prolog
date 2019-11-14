@@ -3,35 +3,33 @@
 :- include('data.pl').
 :- include('uniq.pl').
 
-lte(time(_,_,am),time(_,_,pm)).
-lte(time(H1,_,NT), time(H2,_,NT)):-H1<H2.
-lte(time(H,M1,NT), time(H,M2,NT)):- M1=<M2.
+lte(time(_,_,am), time(_,_,pm)).
+lte(time(T1H,_,AP), time(T2H,_,AP)):-T1H<T2H.
+lte(time(TH,T1M,AP), time(TH,T2M,AP)):-T1M-<T2M.
 
-overlap(slot(BeginOut, EndOut),slot(BeginIn,EndIn),slot(BeginIn,EndIn)):-
-    lte(BeginOut,BeginIn), lte(BeginIn,EndOut), lte(EndIn, EndOut),BeginIn\==EndIn.
+overlab(slot(OuterBeg,OuterEnd), slot(InnerBeg,InnerEnd), slot(InnerBeg,InnerEnd)):-
+    lte(OuterBeg,InnerBeg), lte(InnerBeg,OuterEnd), lte(InnerEnd,OuterEnd),InnerBeg\==InnerEnd.
 
-overlap(slot(BeginOut, EndOut), slot(BeginIn, EndIn), slot(BeginIn, EndOut)):-
-    lte(BeginOut, BeginIn), lte(BeginIn,EndOut), lte(EndOut, EndIn),BeginIn\==EndOut.
+overlab(slot(OuterBeg,OuterEnd), slot(InnerBeg,InnerEnd), slot(InnerBeg,OuterEnd)):-
+    lte(OuterBeg,InnerBeg), lte(InnerBeg,OuterEnd), lte(OuterEnd,InnerEnd),InnerBeg\==OuterEnd.
 
-common(Slot1, Slot2, Slot3):-overlap(Slot2,Slot1,Slot3).
-common(Slot1, Slot2, Slot3):-overlap(Slot1,Slot2,Slot3).
-/*common(Slot1, Slot2, Slot3):-overlap(Slot3,Slot1,Slot2).*/
+common(S1,S2,S3):-overlab(S2,S1,S3).
+common(S1,S2,S3):-overlab(S1,S2,S3).
 
-commonTime([], Slot, Slot).
+commonTime([],Slot,Slot).
 
-commonTime([Person|Tail], StartTime, EndTime):-
-    free(Person, FreeTime), common(StartTime, FreeTime, DoneTime), commonTime(Tail,DoneTime, EndTime).
+commonTime([Person|Tail],FirstSlot, SecondSlot):-
+    free(Person,FreeSlot),common(FirstSlot,FreeSlot,ReturnSlot),commonTime(Tail,ReturnSlot,SecondSlot).
 
-meetall([Person|Tail],Slot):- free(Person, TimeFree), commonTime(Tail, TimeFree, Slot).
+meetall([Person|Tail],Slot):- free(Person,FSlot),commonTime(Tail,FSlot,Slot).
 
-meet(Slot):-people(People),meetall(People,Slot).
+meet(Slot):-people(people),meetall(People,Slot).
 
-people([ann,bob, carla]).
+people([ann,bob,carla]).
 
-main :- findall(Slot, meet(Slot), Slots),
-        uniq(Slots, Uniq),
-        write(Uniq), nl, halt.
-
+main :-findall(Slot,meet(Slot),Slots),
+       uniq(Slots,Uniq),
+       write(Uniq),nl,halt.
 /*meet(Person, slot(time(U,V), time(X,Y))) :-
     free(Person, slot(time(A,B), time(D,E))),
     J is V+(U*60), K is Y+(X*60),
