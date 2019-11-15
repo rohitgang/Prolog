@@ -3,32 +3,31 @@
 :- include('data.pl').
 :- include('uniq.pl').
 
-lte(time(_,_,am), time(_,_,pm)).
-lte(time(T1H,_,AP), time(T2H,_,AP)):-T1H<T2H.
-lte(time(TH,T1M,AP), time(TH,T2M,AP)):-T1M=<T2M.
+% Your code goes here.
+lte(time(_,_,am),time(_,_,pm)).
+lte(time(H1,_,NT),time(H2,_,NT)):-H1<H2.
+lte(time(H,M1,NT),time(H,M2,NT)):-M1=<M2.
 
-overlab(slot(OuterBeg,OuterEnd), slot(InnerBeg,InnerEnd), slot(InnerBeg,InnerEnd)):-
-    lte(OuterBeg,InnerBeg), lte(InnerBeg,OuterEnd), lte(InnerEnd,OuterEnd),InnerBeg\==InnerEnd.
+isSame(slot(StartHour,StartMin), slot(EndHour,EndMin), slot(EndHour,EndMin)):-
+        lte(StartHour,EndHour),lte(EndHour,StartMin),lte(EndMin,StartMin),EndHour\==EndMin.
+isSame(slot(StartHour,StartMin),slot(EndHour,EndMin),slot(EndHour,StartMin)):-
+        lte(StartHour,EndHour),lte(EndHour,StartMin),lte(StartMin,EndMin),EndHour\==StartMin.
 
-overlab(slot(OuterBeg,OuterEnd), slot(InnerBeg,InnerEnd), slot(InnerBeg,OuterEnd)):-
-    lte(OuterBeg,InnerBeg), lte(InnerBeg,OuterEnd), lte(OuterEnd,InnerEnd),InnerBeg\==OuterEnd.
+sharedtime(Slot1, Slot2, Slot3):-isSame(Slot1, Slot2, Slot3).
+sharedtime(Slot1, Slot2, Slot3):-isSame(Slot2, Slot1, Slot3).
 
-common(S1,S2,S3):-overlab(S2,S1,S3).
-common(S1,S2,S3):-overlab(S1,S2,S3).
+playTime(Slotty,Slotty,[]).
+playTime(Slotty,Slotty2,[Firstone|Others]):-
+    free(Firstone,Free), sharedtime(Slotty,Free,Returned), playTime(Returned,Slotty2, Others).
 
-commonTime([],Slot,Slot).
+meetTime(Slotty2,[Firstone|Others]):-
+    free(Firstone,Slotty),playTime(Slotty,Slotty2,Others).
 
-commonTime([Person|Tail],FirstSlot, SecondSlot):-
-    free(Person,FreeSlot),common(FirstSlot,FreeSlot,ReturnSlot),commonTime(Tail,ReturnSlot,SecondSlot).
+meet(Slot):-people(People),meetTime(Slot,People).
 
-meetall([Person|Tail],Slot):- free(Person,FSlot),commonTime(Tail,FSlot,Slot).
+people([bob,ann,dave]).
 
-meet(Slot):-people(People),meetall(People,Slot).
-
-people([ann,bob,carla]).
-
-main :-findall(Slot,meet(Slot),Slots),
-       uniq(Slots,Uniq),
-       write(Uniq),nl,halt.
-
+main :- findall(Slot, meet(Slot), Slots),
+        uniq(Slots, Uniq),
+        write(Uniq), nl, halt.
 :- initialization(main).
